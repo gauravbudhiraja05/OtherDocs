@@ -1,0 +1,798 @@
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_AuthenticateUser`(IN IN_Email VARCHAR(200), IN IN_Password VARCHAR(200))
+BEGIN
+        DECLARE p_UserId INT;  
+     	DECLARE p_EmailId VARCHAR(100);  
+     	DECLARE p_FullName VARCHAR(100);  
+     	DECLARE p_IsSuccess INT DEFAULT 0;  
+     	DECLARE p_Message VARCHAR(100);
+     
+     	IF EXISTS (SELECT COUNT(*) FROM admins WHERE email = IN_Email AND password = IN_Password)
+     	THEN 
+     		SELECT id, email, CONCAT(first_name, ' ' , last_name)  into p_UserId, p_EmailId, p_FullName from admins
+     		WHERE  email = IN_Email and password =IN_Password; 
+            SET p_IsSuccess=1;  
+        	SET  p_Message='Record Found';
+        ELSE
+        	SET p_IsSuccess=0;  
+   			SET p_Message='No Record Found';
+        END IF;
+        SELECT p_UserId as UserId,p_EmailId as EmailId,p_FullName as FullName,
+        p_IsSuccess as IsSuccess,p_Message as Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_DeleteAdviceById`(
+IN IN_Id INT,
+IN IN_Type VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        IF(IN_Type = 'Master')
+        THEN
+        	Delete from advices where id= IN_Id;  
+        ELSE
+        	Delete from doctor_advices where id= IN_Id; 
+        END IF;
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Records Deleted Successfully';  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_DeleteDoctorById`(
+IN In_Id INT
+)
+BEGIN
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        UPDATE doctors set is_active = 0 where id= IN_Id;  
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Records Deleted Successfully';  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_DeletePrescriptionMetaDataById`(IN IN_Id INT)
+BEGIN
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        UPDATE prescription_meta_data set  is_revoked =0 where id =IN_Id;
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Records Deleted Successfully';  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_DeletePrescriptionMetaTypeById`(IN IN_Id INT)
+BEGIN
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        DELETE from prescription_meta_type where id= IN_Id;  
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Records Deleted Successfully';  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetAdviceById`(IN IN_Id INT, IN IN_Type VARCHAR(200))
+BEGIN
+        IF(IN_Type = 'Master')
+        THEN
+        	Select id as Id, description  as Description  from  advices where id=IN_Id;
+        ELSE
+        	Select id as Id, doctor_id  as DoctorId, problem_tags  as ProblemTags,
+        	advice  as Description  from  doctor_advices where id =IN_Id;
+        	
+        END IF;
+        Select id as DoctorId, name as DoctorName from doctors where is_active =1 ;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetAdviceDataToCreateDoctorAdvice`()
+BEGIN
+	  Select id as DoctorId , name as DoctorName FROM doctors where is_active =1;
+	  select description from advices;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetAdviceListByDoctorId`(IN In_doctorId INT, IN IN_type VARCHAR(200))
+BEGIN
+	  IF (IN_type = 'Master') THEN
+	  	SELECT  id as Id, description  as Description FROM advices;
+	  ELSE
+		SELECT da.id as Id, da.advice as Description, da.doctor_id  as DoctorId, d.name as DoctorName, da.problem_tags  as ProblemTags
+        FROM doctor_advices da LEFT JOIN doctors d ON da.doctor_id = d.id
+        WHERE (In_doctorId=0 OR da.doctor_id=In_doctorId);
+	 END IF;   
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetAdviceSearchedDoctorProblemTagsList`()
+BEGIN
+	  Select GROUP_CONCAT(problem_tags)  from doctor_advices;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetAllDoctors`()
+BEGIN
+     	SELECT id as DoctorId, name as DoctorName, phone as TelephoneNumber, email as DoctorEmail 
+        FROM doctors WHERE is_active = 1;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetAllPrescriptionMetaTypes`()
+BEGIN
+	    SELECT id as ID,type as Type FROM prescription_meta_type ;  
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetDoseMetaById`(IN IN_id INT)
+BEGIN
+	    SELECT id as id,Type,TypeId as DoseMetaTypeId,Name FROM dose_meta where id =IN_id;  
+  		SELECT id as ID,Type FROM dose_meta_type;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetMasterMedicineDetails`(IN IN_id INT)
+BEGIN
+	  SELECT id as MedicineId, medicine_name  as MedicineName, frequency as Frequency,
+	  directions  as Directions, composition  as Composition, duration  as Duration, dose as Dose,
+	  dose_unit  as DoseUnit FROM medicine_doses where id =IN_id;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetMedicineDetailByMedicineName`(
+IN IN_medicineName VARCHAR(200),
+IN IN_type VARCHAR(200)
+)
+BEGIN
+	  IF(IN_Type = 'Master')
+        THEN
+        	SELECT id as MedicineId, medicine_name  as MedicineName, frequency as Frequency,
+	  		directions  as Directions, composition  as Composition, duration  as Duration, dose as Dose,
+	  		dose_unit  as DoseUnit 	FROM medicine_doses where medicine_name like CONCAT('%' ,IN_medicineName , '%');
+      ELSE
+           IF (SELECT Count(*) from doctor_medicine_doses where medicine_name like CONCAT('%' ,IN_medicineName , '%') > 0)
+           	THEN
+        		SELECT dmd.id as MedicineId, dmd.medicine_name  as MedicineName, dmd.frequency as Frequency,
+	  			dmd.directions  as Directions, dmd.composition  as Composition, dmd.duration  as Duration, 
+	  			dmd.problem_tags as ProblemTags, dmd.dose as Dose, dmd.dose_unit  as DoseUnit , dmd.doctor_id  as DoctorId, 
+	  			d.name as DoctorName FROM doctor_medicine_doses dmd  LEFT JOIN doctors d ON dmd.doctor_id = d.id 
+            	WHERE dmd.medicine_name like CONCAT('%' ,IN_medicineName , '%');
+            ELSE
+            	SELECT id as MedicineId, medicine_name  as MedicineName, frequency as Frequency,
+	  			directions  as Directions, composition  as Composition, duration  as Duration, dose as Dose,
+	  			dose_unit  as DoseUnit 	FROM medicine_doses where medicine_name like CONCAT('%' ,IN_medicineName , '%');
+            END if;		
+      END IF;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetMedicineDoseById`(IN IN_medicineid INT, IN IN_Type VARCHAR(200))
+BEGIN
+		IF(IN_Type = 'Master')
+        THEN
+        	SELECT id as MedicineId, medicine_name  as MedicineName, frequency as Frequency,
+	  		directions  as Directions, composition  as Composition, duration  as Duration, dose as Dose,
+	  		dose_unit  as DoseUnit 	FROM medicine_doses where id =IN_medicineid;
+        ELSE
+        	SELECT dmd.id as MedicineId, dmd.medicine_name  as MedicineName, dmd.frequency as Frequency,
+	  		dmd.directions  as Directions, dmd.composition  as Composition, dmd.duration  as Duration, dmd.problem_tags as ProblemTags,
+	  		dmd.dose as Dose, dmd.dose_unit  as DoseUnit , dmd.doctor_id  as DoctorId, d.name as DoctorName
+        	FROM doctor_medicine_doses dmd  LEFT JOIN doctors d ON dmd.doctor_id = d.id where dmd.id =IN_medicineid;
+        	
+        END IF;
+      	Select id as DoctorId , name as DoctorName FROM doctors where is_active =1;
+		Select value as Name from prescription_meta_data where `type` ='FREQUENCY' order by display_order;
+		Select value as Name from prescription_meta_data where `type` ='DOSE' order by display_order;
+		Select value as Name from prescription_meta_data where `type` ='DOSEUNIT' order by display_order;
+		Select value as Name from prescription_meta_data where `type` ='DIRECTION' order by display_order;
+		Select value as Name from prescription_meta_data where `type` ='DURATION' order by display_order;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetMedicineDoseDataToCreateMedicineDose`()
+begin
+		Select id as DoctorId , name as DoctorName FROM doctors where is_active =1;
+		Select value as Name from prescription_meta_data where `type` ='FREQUENCY' order by display_order;
+		Select value as Name from prescription_meta_data where `type` ='DOSE' order by display_order;
+		Select value as Name from prescription_meta_data where `type` ='DOSEUNIT' order by display_order;
+		Select value as Name from prescription_meta_data where `type` ='DIRECTION' order by display_order;
+		Select value as Name from prescription_meta_data where `type` ='DURATION' order by display_order;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetMedicineDoseListByDoctorId`(IN In_doctorId INT, IN IN_type VARCHAR(200))
+BEGIN
+		IF (IN_type = 'Master') THEN
+	  	SELECT  id as MedicineId, medicine_name  as MedicineName, frequency as Frequency,
+	  	directions  as Directions, composition  as Composition, duration  as Duration, dose as Dose,
+	  	dose_unit  as DoseUnit 	FROM medicine_doses;
+	  ELSE
+		SELECT dmd.id as MedicineId, dmd.medicine_name  as MedicineName, dmd.frequency as Frequency,
+	  	dmd.directions  as Directions, dmd.composition  as Composition, dmd.duration  as Duration, dmd.dose as Dose,
+	  	dmd.dose_unit  as DoseUnit , dmd.doctor_id  as DoctorId, d.name as DoctorName
+        FROM doctor_medicine_doses dmd LEFT JOIN doctors d ON dmd.doctor_id = d.id
+        WHERE (In_doctorId = 0 OR dmd.doctor_id=In_doctorId);
+	 END IF;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetMedicineDoseSearchedDoctorProblemTagsList`()
+BEGIN
+	  Select GROUP_CONCAT(problem_tags)  from doctor_medicine_doses;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetPrescriptionMetaDataByPrescriptionMetaTypeId`(IN IN_prescriptionMetaType VARCHAR(200))
+BEGIN
+	    SELECT id as Id, value as Value, type as Type, display_order as DisplayOrderNumber
+        FROM prescription_meta_data WHERE (IN_prescriptionMetaType = '' OR type = IN_prescriptionMetaType);  
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetSearchedAdviceList`(IN IN_prefix VARCHAR(200))
+BEGIN
+	  Select description  from advices where description like CONCAT('%' ,IN_prefix , '%')
+	  UNION  DISTINCT
+	  Select  advice from doctor_advices where advice like CONCAT('%' ,IN_prefix , '%') ;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetSearchedDoctorNameList`(IN IN_prefix VARCHAR(200))
+BEGIN
+	  Select name from doctors where name like CONCAT('%' ,IN_prefix , '%');
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetSearchedMedicineDoseList`(IN IN_prefix VARCHAR(200))
+BEGIN
+	  Select medicine_name  from medicine_doses where medicine_name  like CONCAT('%' ,IN_prefix , '%')
+	  UNION  DISTINCT
+	  Select  medicine_name from doctor_medicine_doses where medicine_name like CONCAT('%' ,IN_prefix , '%');
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetSearchedTestList`(IN IN_prefix VARCHAR(200))
+BEGIN
+	  Select test_name from tests where test_name like CONCAT('%' ,IN_prefix , '%')
+	  UNION  DISTINCT
+	  select test from doctor_tests where test like CONCAT('%' ,IN_prefix , '%') ;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetSearchedTypeList`(IN IN_prefix VARCHAR(200))
+BEGIN
+	  Select type from prescription_meta_type where type like CONCAT('%' ,IN_prefix , '%');
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetTestById`(IN IN_id INT, IN IN_type VARCHAR(200))
+BEGIN
+	 IF(IN_type = 'Master')
+        THEN
+        	Select id as Id, test_name  as TestName  from  tests where id=IN_id;
+        ELSE
+        	Select id as Id, doctor_id  as DoctorId, problem_tags  as ProblemTags,
+        	test  as TestName  from  doctor_tests where id =IN_id;
+        	
+        END IF;
+        Select id as DoctorId, name as DoctorName from doctors where is_active =1 ;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetTestDataToCreateDoctorTest`()
+BEGIN
+	  Select id as DoctorId , name as DoctorName FROM doctors where is_active =1;
+	  select test_name from tests ;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetTestListByDoctorId`(IN In_doctorId INT, IN IN_type VARCHAR(200))
+BEGIN
+	IF (IN_type = 'Master') THEN
+	SELECT  id as Id, test_name  as TestName FROM tests;
+	 ELSE
+	  	SELECT test.id as Id, test.test as TestName, test.doctor_id  as DoctorId,
+           test.problem_tags as ProblemTags , d.name as DoctorName
+	  	   FROM doctor_tests test LEFT JOIN doctors d ON test.doctor_id = d.id
+           WHERE (In_doctorId=0 OR test.doctor_id=In_doctorId);
+	  END IF;   
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_GetTestSearchedDoctorProblemTagsList`()
+BEGIN
+	  Select GROUP_CONCAT(problem_tags)  from doctor_tests;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_IsAdviceExist`(
+IN IN_id   		  INT,
+IN IN_description VARCHAR(200),
+IN In_doctorId 	  INT
+)
+BEGIN
+	    DECLARE p_Exists INT DEFAULT 0;  
+        DECLARE p_condition VARCHAR (200);
+        DECLARE p_type  VARCHAR (200);
+         IF (In_doctorId = 0) THEN 
+       		SET p_type ='Master';
+        ELSE
+        	SET p_type ='Doctor';
+        END IF;
+        IF (IN_id = 0) THEN 
+       		SET p_condition ='Add';
+        ELSE
+        	SET p_condition ='Edit';
+        END IF;
+	    IF(p_type = 'Master') THEN
+        	IF (p_condition = 'Add') THEN
+        		IF EXISTS (Select description from advices where  description = In_description  ) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        			SET p_Exists=0;
+        		END IF;
+        	ELSE 
+        		IF EXISTS (Select description from advices where  description = In_description  and id != IN_Id) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        		SET p_Exists=0;
+        		END IF;
+        	END IF;
+        ELSE
+        	IF (p_condition = 'Add') THEN
+        		IF EXISTS (Select advice from doctor_advices where doctor_id = In_doctorId and advice = In_description ) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        		SET p_Exists=0;
+        		END IF;
+        	ELSE
+        		IF EXISTS (Select advice from doctor_advices where doctor_id = In_doctorId and id != IN_Id and advice = In_description ) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        		SET p_Exists=0;
+        		END IF;
+        	END IF;
+        END IF;
+        SELECT p_Exists AS isExist;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_IsDoctorNameExist`(
+IN IN_id   		  INT,
+IN IN_doctorName VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_Exists INT DEFAULT 0;  
+        IF EXISTS (Select name from doctors where  name = IN_doctorName) THEN 
+        	SET p_Exists=1;
+        ELSE
+        	SET p_Exists=0;
+        END IF;
+        SELECT p_Exists AS isExist;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_IsMedicineExist`(
+IN IN_id   		  INT,
+IN IN_medicineName VARCHAR(200),
+IN In_doctorId 	  INT
+)
+BEGIN
+	    DECLARE p_Exists INT DEFAULT 0;  
+        DECLARE p_condition VARCHAR (200);
+        DECLARE p_type  VARCHAR (200);
+         IF (In_doctorId = 0) THEN 
+       		SET p_type ='Master';
+        ELSE
+        	SET p_type ='Doctor';
+        END IF;
+        IF (IN_id = 0) THEN 
+       		SET p_condition ='Add';
+        ELSE
+        	SET p_condition ='Edit';
+        END IF;
+	    IF(p_type = 'Master') THEN
+        	IF (p_condition = 'Add') THEN
+        		IF EXISTS (Select medicine_name from medicine_doses where  medicine_name = IN_medicineName) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        			SET p_Exists=0;
+        		END IF;
+        	ELSE 
+        		IF EXISTS (Select medicine_name from medicine_doses where  medicine_name = IN_medicineName  and id != IN_Id) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        		SET p_Exists=0;
+        		END IF;
+        	END IF;
+        ELSE
+        	IF (p_condition = 'Add') THEN
+        		IF EXISTS (Select medicine_name from doctor_medicine_doses where doctor_id = In_doctorId and medicine_name = IN_medicineName) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        		SET p_Exists=0;
+        		END IF;
+        	ELSE
+        		IF EXISTS (Select medicine_name from doctor_medicine_doses where doctor_id = In_doctorId and id != IN_Id and medicine_name = IN_medicineName) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        		SET p_Exists=0;
+        		END IF;
+        	END IF;
+        END IF;
+        SELECT p_Exists AS isExist;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_IsTestExist`(
+IN IN_id   		  INT,
+IN IN_testName VARCHAR(200),
+IN In_doctorId 	  INT
+)
+BEGIN
+	    DECLARE p_Exists INT DEFAULT 0;  
+        DECLARE p_condition VARCHAR (200);
+        DECLARE p_type  VARCHAR (200);
+         IF (In_doctorId = 0) THEN 
+       		SET p_type ='Master';
+        ELSE
+        	SET p_type ='Doctor';
+        END IF;
+        IF (IN_id = 0) THEN 
+       		SET p_condition ='Add';
+        ELSE
+        	SET p_condition ='Edit';
+        END IF;
+	    IF(p_type = 'Master') THEN
+        	IF (p_condition = 'Add') THEN
+        		IF EXISTS (Select test_name from tests where  test_name = IN_testName ) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        			SET p_Exists=0;
+        		END IF;
+        	ELSE 
+        		IF EXISTS (Select test_name from tests where  test_name = IN_testName and id != IN_Id) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        		SET p_Exists=0;
+        		END IF;
+        	END IF;
+        ELSE
+        	IF (p_condition = 'Add') THEN
+        		IF EXISTS (Select test from doctor_tests where doctor_id = In_doctorId and test = IN_testName) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        		SET p_Exists=0;
+        		END IF;
+        	ELSE
+        		IF EXISTS (Select test from doctor_tests where doctor_id = In_doctorId and id != IN_Id and test = IN_testName) THEN 
+        			SET p_Exists=1;
+        		ELSE
+        		SET p_Exists=0;
+        		END IF;
+        	END IF;
+        END IF;
+        SELECT p_Exists AS isExist;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_IsTypeExist`(
+IN IN_id   INT,
+IN IN_type VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_Exists INT DEFAULT 0;  
+        IF EXISTS (Select type from prescription_meta_type where type= IN_type  ) THEN 
+        	SET p_Exists=1;
+        ELSE
+        	SET p_Exists=0;
+        END IF;
+        SELECT p_Exists AS isExist;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_SaveAdvice`(
+IN IN_Id INT, 
+IN IN_description VARCHAR(200),
+IN IN_doctorId INT,
+IN IN_problemTags VARCHAR(200),
+IN IN_type VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_Identity INT;
+	    DECLARE p_SubIdentity INT;
+        DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        DECLARE p_AdviceId INT;
+        DECLARE p_AdviceDescription VARCHAR(200);
+        IF(IN_type = 'Master')
+        THEN
+        	INSERT INTO advices (description ,created_at) VALUES (IN_description,CURRENT_TIMESTAMP());  
+        	SELECT LAST_INSERT_ID() into p_Identity;
+        ELSE
+        	IF EXISTS (SELECT * from advices a where description = IN_description) 
+        	THEN 
+        		SELECT id into p_AdviceId from advices where description = IN_description;
+        		INSERT INTO doctor_advices(doctor_id,advice,advice_id,problem_tags,created_at)
+        	    VALUES (IN_doctorId,IN_description,p_AdviceId,IN_problemTags,CURRENT_TIMESTAMP());
+        	    SELECT LAST_INSERT_ID() into p_Identity;
+        	ELSE
+        		INSERT INTO advices(description,created_at) values(IN_description,CURRENT_TIMESTAMP());
+        		SELECT id into p_SubIdentity from advices where description = IN_description;
+        	    INSERT INTO doctor_advices(doctor_id,advice,advice_id,problem_tags,created_at)
+        	    VALUES (IN_doctorId,IN_description,p_SubIdentity,IN_problemTags,CURRENT_TIMESTAMP());
+        	    SELECT LAST_INSERT_ID() into p_Identity;
+        	END IF;
+        END IF;
+        IF(p_Identity > 0)  THEN
+        	SET p_IsSuccess = 1;  
+            SET p_Message = 'Record Saved Successfully';    
+        ELSE  
+            SET p_IsSuccess = 0;  
+            SET p_Message = 'Record Not Saved Successfully';  
+        END IF;  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_SaveDoctor`(
+IN IN_DoctorId INT, 
+IN IN_doctorName VARCHAR(200),
+IN IN_doctorEmail VARCHAR(200),
+IN IN_telephoneNumber VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_Identity INT;
+        DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        declare p_password VARCHAR(200);
+        SELECT '$2a$10$wJCJGmeKGEM.ARXejFZZuuENF3HFe0BAUMO00qLmLeoVyTxYPFTZe' into p_password;
+        INSERT INTO doctors(name, email, phone, password, created_at) 
+        VALUES (IN_doctorName, IN_doctorEmail, IN_telephoneNumber, p_password, CURRENT_TIMESTAMP());  
+        SELECT LAST_INSERT_ID() into p_Identity;
+        IF(p_Identity > 0)  THEN
+        	SET p_IsSuccess = 1;  
+            SET p_Message = 'Record Saved Successfully';    
+        ELSE  
+            SET p_IsSuccess = 0;  
+            SET p_Message = 'Record Not Saved Successfully';  
+        END IF;  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_SaveMedicineDose`(
+IN IN_medicineName  		VARCHAR(255), 
+IN IN_frequency 			VARCHAR(255),
+IN IN_directions 			VARCHAR(255),
+IN IN_composition 			VARCHAR(255),
+IN IN_duration 				VARCHAR(255),
+IN IN_dose 					VARCHAR(255),
+IN IN_doseUnit				VARCHAR(255),
+IN IN_doctorId 				INT,
+IN IN_problemTags 			VARCHAR(200),
+IN IN_type 					VARCHAR(200)
+)
+BEGIN
+		DECLARE p_Identity 				INT;
+        DECLARE p_IsSuccess 			INT DEFAULT 0;  
+        DECLARE p_Message 				VARCHAR(100);
+       	DECLARE p_medicineID			INT;
+        DECLARE p_medicineName  		VARCHAR(255); 
+		DECLARE p_frequency 			VARCHAR(255);
+		DECLARE p_directions 			VARCHAR(255);
+		DECLARE p_composition 			VARCHAR(255);
+		DECLARE p_duration 				VARCHAR(255);
+		DECLARE p_dose 					VARCHAR(255);
+		DECLARE p_doseUnit				VARCHAR(255);
+        IF (IN_type = 'Master')
+        THEN
+        	INSERT INTO medicine_doses(medicine_name, frequency, directions, composition, 
+        	duration, dose, dose_unit, created_at) 
+        	VALUES (IN_medicineName, IN_frequency, IN_directions, IN_composition,
+        	In_duration, IN_dose, IN_doseUnit, CURRENT_TIMESTAMP());  
+        	SELECT LAST_INSERT_ID() into p_Identity;
+        ELSE
+        	IF EXISTS (SELECT * from medicine_doses where medicine_name = IN_medicineName ) 
+        	THEN 
+        		SELECT id into p_medicineID from medicine_doses  where medicine_name = IN_medicineName ;
+        		INSERT INTO doctor_medicine_doses(doctor_id, medicine_name, frequency, directions, composition, 
+        		duration, dose, dose_unit, problem_tags, created_at)
+        	    VALUES (IN_doctorId, IN_medicineName, IN_frequency, IN_directions, IN_composition, 
+        	    In_duration, IN_dose, IN_doseUnit, IN_problemTags, CURRENT_TIMESTAMP());
+        	    SELECT LAST_INSERT_ID() into p_Identity;
+        	ELSE
+        		INSERT INTO medicine_doses(medicine_name, frequency, directions, composition, 
+        		duration, dose, dose_unit, created_at)
+        		Values(IN_medicineName, IN_frequency, IN_directions, IN_composition,
+        		In_duration, IN_dose, IN_doseUnit, CURRENT_TIMESTAMP());
+        		INSERT INTO doctor_medicine_doses(medicine_name, frequency, directions, composition, 
+        		duration, dose, dose_unit, doctor_id, problem_tags, created_at)
+        	    VALUES (IN_medicineName, IN_frequency, IN_directions, IN_composition,
+        		In_duration, IN_dose, IN_doseUnit, IN_doctorId, IN_problemTags, CURRENT_TIMESTAMP());
+        	    SELECT LAST_INSERT_ID() into p_Identity;
+        	END IF;
+        END IF;
+        IF(p_Identity > 0)  THEN
+        	SET p_IsSuccess = 1;  
+            SET p_Message = 'Record Saved Successfully';    
+        ELSE  
+            SET p_IsSuccess = 0;  
+            SET p_Message = 'Record Not Saved Successfully';  
+        END IF;  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_SavePrescriptionMetaData`(
+IN IN_type 			VARCHAR(200),
+IN IN_value 		VARCHAR(200),
+IN IN_displayOrder  INT
+)
+BEGIN
+	    DECLARE p_Identity INT;
+        DECLARE p_IsSuccess INT DEFAULT 0;
+        DECLARE p_Message VARCHAR(100);
+        INSERT INTO prescription_meta_data(type, value, display_order , is_revoked, created_at) 
+        VALUES (IN_type, IN_value, IN_displayOrder, 1, CURRENT_TIMESTAMP());
+		SELECT LAST_INSERT_ID() into p_Identity;
+		IF(p_Identity > 0) 
+			THEN
+				SET @IsSuccess=1;
+				SET @Message='Record Saved Successfully';
+		ELSE	
+				SET @IsSuccess=0;
+				SET @Message='Record Not Saved Successfully';
+		END IF;	
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_SavePrescriptionMetaType`(
+IN IN_Id INT,
+IN IN_type VARCHAR(200)
+)
+begin
+	    DECLARE p_Identity	INT DEFAULT 0;  
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+		INSERT INTO prescription_meta_type(type) VALUES (IN_type);  
+        SELECT LAST_INSERT_ID() into p_Identity;
+        IF(p_Identity > 0)  THEN
+        	SET p_IsSuccess = 1;  
+            SET p_Message = 'Record Saved Successfully';    
+        ELSE  
+            SET p_IsSuccess = 0;  
+            SET p_Message = 'Record Not Saved Successfully';  
+        END IF;  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_SaveTest`(
+IN IN_Id INT, 
+IN IN_testName VARCHAR(200),
+IN IN_doctorId INT,
+IN IN_problemTags VARCHAR(200),
+IN IN_type VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_Identity INT;
+	    DECLARE p_SubIdentity INT;
+        DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        DECLARE p_TestId INT;
+        DECLARE p_TestTestName VARCHAR(200);
+        IF(IN_type = 'Master')
+        THEN
+        	INSERT INTO tests (test_name ,created_at) VALUES (IN_testName,CURRENT_TIMESTAMP());  
+        	SELECT LAST_INSERT_ID() into p_Identity;
+        ELSE
+        	IF EXISTS (SELECT * from tests a where test_name = IN_testName ) 
+        	THEN 
+        		SELECT id into p_TestId from tests where test_name = IN_testName ;
+        		INSERT INTO doctor_tests(doctor_id,test,test_id,problem_tags,created_at)
+        	    VALUES (IN_doctorId,IN_testName,p_TestId,IN_problemTags,CURRENT_TIMESTAMP());
+        	    SELECT LAST_INSERT_ID() into p_Identity;
+        	ELSE
+        		INSERT INTO tests(test_name,created_at) values(IN_TestName,CURRENT_TIMESTAMP());
+        		SELECT id into p_SubIdentity from Tests where IN_testName = IN_testName ;
+        	    INSERT INTO doctor_Tests(doctor_id,test,test_id ,problem_tags,created_at)
+        	    VALUES (IN_doctorId,IN_testName,p_SubIdentity,IN_problemTags,CURRENT_TIMESTAMP());
+        	    SELECT LAST_INSERT_ID() into p_Identity;
+        	END IF;
+        END IF;
+        IF(p_Identity > 0)  THEN
+        	SET p_IsSuccess = 1;  
+            SET p_Message = 'Record Saved Successfully';    
+        ELSE  
+            SET p_IsSuccess = 0;  
+            SET p_Message = 'Record Not Saved Successfully';  
+        END IF;  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_UpdateAdvice`(
+IN IN_Id INT, 
+IN IN_description VARCHAR(200),
+IN IN_doctorId INT,
+IN IN_problemTags VARCHAR(200),
+IN IN_type VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        IF(IN_type = 'Master')
+        THEN
+        	Update advices set description = IN_description, updated_at = CURRENT_TIMESTAMP() where id= IN_Id;  
+        ELSE
+        	Update doctor_advices set advice = IN_description, problem_tags = IN_problemTags, 
+        	doctor_id = IN_doctorId, updated_at = CURRENT_TIMESTAMP() where id= IN_Id; 
+        END IF;
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Record Updated Successfully';  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_UpdateDoctor`(
+IN IN_DoctorId INT, 
+IN IN_doctorName VARCHAR(200),
+IN IN_doctorEmail VARCHAR(200),
+IN IN_telephoneNumber VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        UPDATE doctors set name = IN_doctorName, email = IN_doctorEmail, phone = IN_telephoneNumber,
+        updated_at = CURRENT_TIMESTAMP() where id= IN_DoctorId;   
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Record Updated Successfully';  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_UpdateMedicineDose`(
+IN IN_medicineId   INT,
+IN IN_medicineName VARCHAR(200),
+IN IN_doctorId 	   INT,
+IN IN_frequency    VARCHAR(200), 
+IN IN_directions   VARCHAR(200),
+IN IN_composition  VARCHAR(200),
+IN IN_duration     VARCHAR(200),
+IN IN_dose 		   VARCHAR(200),
+IN IN_dose_unit    VARCHAR(200),
+IN IN_problemTags  VARCHAR(200),
+IN IN_type 		   VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        IF(IN_type = 'Master')
+        THEN
+        	Update medicine_doses set medicine_name = IN_medicineName, frequency = IN_frequency, 
+        	directions =IN_directions, composition =IN_composition, duration =IN_duration, dose= IN_dose, 
+        	dose_unit = IN_dose_unit where id= IN_medicineId;  
+        ELSE
+        	Update doctor_medicine_doses set medicine_name = IN_medicineName, frequency = IN_frequency, 
+        	directions =IN_directions, composition =IN_composition, duration =IN_duration, dose= IN_dose, 
+        	dose_unit = IN_dose_unit, doctor_id =IN_doctorId, problem_tags = IN_problemTags where id= IN_medicineId;
+        END IF;
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Record Updated Successfully';  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_UpdatePrescriptionMetaData`(
+IN IN_id 			 	    INT,
+IN IN_prescriptionMetaType  VARCHAR(200),
+IN IN_name 		     	    VARCHAR(200),
+IN_displayOrder				INT
+)
+BEGIN
+		DECLARE p_IsSuccess INT DEFAULT 0;
+        DECLARE p_Message VARCHAR(100);
+        UPDATE prescription_meta_data SET type = IN_prescriptionMetaType, value = IN_name, 
+        display_order = IN_displayOrder WHERE Id = IN_id;
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Record Updated Successfully';
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_UpdatePrescriptionMetaType`(
+IN IN_Id INT,
+IN IN_type VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+		UPDATE prescription_meta_type set type= IN_type where id = IN_Id;  
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Record Updated Successfully';  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;
+
+CREATE DEFINER=`veterzkp_dbuser`@`%.%.%.%` PROCEDURE `dosebook_admin`.`usp_UpdateTest`(
+IN IN_Id INT, 
+IN IN_testName VARCHAR(200),
+IN IN_doctorId INT,
+IN IN_problemTags VARCHAR(200),
+IN IN_type VARCHAR(200)
+)
+BEGIN
+	    DECLARE p_IsSuccess INT DEFAULT 0;  
+        DECLARE p_Message VARCHAR(100);
+        IF(IN_type = 'Master')
+        THEN
+        	Update tests set test_name = IN_testName, updated_at = CURRENT_TIMESTAMP() where id= IN_Id;  
+        ELSE
+        	Update doctor_tests set test = IN_testName, problem_tags = IN_problemTags, 
+        	doctor_id = IN_doctorId, updated_at = CURRENT_TIMESTAMP() where id= IN_Id; 
+        END IF;
+        SET p_IsSuccess = 1;
+        SET p_Message = 'Record Updated Successfully';  
+        SELECT p_IsSuccess AS IsSuccess, p_Message AS Message;
+END;

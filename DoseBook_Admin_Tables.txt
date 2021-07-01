@@ -1,0 +1,415 @@
+-- dosebook_admin.admins definition
+
+CREATE TABLE `admins` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `first_name` varchar(80) NOT NULL,
+  `last_name` varchar(80) NOT NULL,
+  `email` varchar(254) NOT NULL,
+  `password` varchar(60) NOT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `admins_email_unique` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.adonis_schema definition
+
+CREATE TABLE `adonis_schema` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `batch` int DEFAULT NULL,
+  `migration_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.advices definition
+
+CREATE TABLE `advices` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.clinics definition
+
+CREATE TABLE `clinics` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.doctor_profiles definition
+
+CREATE TABLE `doctor_profiles` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.doctors definition
+
+CREATE TABLE `doctors` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.medicine_doses definition
+
+CREATE TABLE `medicine_doses` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `medicine_name` varchar(255) NOT NULL,
+  `frequency` varchar(255) NOT NULL,
+  `directions` varchar(255) NOT NULL,
+  `composition` varchar(255) DEFAULT NULL,
+  `duration` varchar(255) NOT NULL,
+  `dose` varchar(255) NOT NULL,
+  `dose_unit` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.medicines definition
+
+CREATE TABLE `medicines` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `composition` varchar(255) NOT NULL,
+  `mfg_by` varchar(255) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `current_discount` int DEFAULT '0',
+  `max_discount` int DEFAULT '0',
+  `purchase_price` decimal(8,2) DEFAULT '0.00',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.prescription_meta_data definition
+
+CREATE TABLE `prescription_meta_data` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `type` enum('FREQUENCY','DOSE','DOSEUNIT','DURATION','DIRECTION') DEFAULT NULL,
+  `value` varchar(255) NOT NULL,
+  `is_revoked` tinyint(1) DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `display_order` int unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_index` (`type`,`value`)
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.prescription_meta_type definition
+
+CREATE TABLE `prescription_meta_type` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `type` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+-- dosebook_admin.tests definition
+
+CREATE TABLE `tests` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `test_name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.users definition
+
+CREATE TABLE `users` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(80) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(60) DEFAULT NULL,
+  `mobile` varchar(60) NOT NULL,
+  `confirmation_token` varchar(255) DEFAULT NULL,
+  `verified` tinyint(1) DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_mobile_unique` (`mobile`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.compounders definition
+
+CREATE TABLE `compounders` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(80) DEFAULT NULL,
+  `email` varchar(254) DEFAULT NULL,
+  `mobile` varchar(60) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `invited_by` int unsigned DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `compounders_invited_by_foreign` (`invited_by`),
+  CONSTRAINT `compounders_invited_by_foreign` FOREIGN KEY (`invited_by`) REFERENCES `doctors` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.dictionary_words definition
+
+CREATE TABLE `dictionary_words` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `doctor_id` int unsigned NOT NULL,
+  `w` varchar(255) NOT NULL,
+  `r` int DEFAULT NULL,
+  `f` int DEFAULT NULL,
+  `t` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `dictionary_words_doctor_id_foreign` (`doctor_id`),
+  CONSTRAINT `dictionary_words_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.doctor_advices definition
+
+CREATE TABLE `doctor_advices` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `doctor_id` int unsigned NOT NULL,
+  `advice` varchar(255) DEFAULT NULL,
+  `advice_id` int unsigned DEFAULT NULL,
+  `problem_tags` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `doctor_advices_doctor_id_foreign` (`doctor_id`),
+  KEY `doctor_advices_advice_id_foreign` (`advice_id`),
+  CONSTRAINT `doctor_advices_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`),
+  CONSTRAINT `doctor_advices_FK` FOREIGN KEY (`advice_id`) REFERENCES `advices` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.doctor_dictionaries definition
+
+CREATE TABLE `doctor_dictionaries` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `doctor_id` int unsigned NOT NULL,
+  `words` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `doctor_dictionaries_doctor_id_foreign` (`doctor_id`),
+  CONSTRAINT `doctor_dictionaries_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.doctor_medicine_doses definition
+
+CREATE TABLE `doctor_medicine_doses` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `medicine_name` varchar(255) NOT NULL,
+  `frequency` varchar(255) NOT NULL,
+  `directions` varchar(255) NOT NULL,
+  `composition` varchar(255) DEFAULT NULL,
+  `duration` varchar(255) NOT NULL,
+  `dose` varchar(255) NOT NULL,
+  `dose_unit` varchar(255) NOT NULL,
+  `doctor_id` int unsigned NOT NULL,
+  `problem_tags` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `doctor_medicine_doses_doctor_id_foreign` (`doctor_id`),
+  CONSTRAINT `doctor_medicine_doses_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.doctor_tests definition
+
+CREATE TABLE `doctor_tests` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `doctor_id` int unsigned NOT NULL,
+  `test` varchar(255) DEFAULT NULL,
+  `test_id` int unsigned DEFAULT NULL,
+  `problem_tags` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `doctor_tests_doctor_id_foreign` (`doctor_id`),
+  KEY `doctor_tests_test_id_foreign` (`test_id`),
+  CONSTRAINT `doctor_tests_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`),
+  CONSTRAINT `doctor_tests_FK` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.patients definition
+
+CREATE TABLE `patients` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(80) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `mobile` varchar(255) NOT NULL,
+  `gender` enum('male','female','other') DEFAULT NULL,
+  `dob` date DEFAULT NULL,
+  `user_id` int unsigned NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `patients_user_id_foreign` (`user_id`),
+  CONSTRAINT `patients_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.prescriptions definition
+
+CREATE TABLE `prescriptions` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `patient_id` int unsigned NOT NULL,
+  `doctor_id` int unsigned NOT NULL,
+  `problem` varchar(255) DEFAULT NULL,
+  `next_visit_due` date DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `prescriptions_patient_id_foreign` (`patient_id`),
+  KEY `prescriptions_doctor_id_foreign` (`doctor_id`),
+  CONSTRAINT `prescriptions_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`),
+  CONSTRAINT `prescriptions_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.prx_advices definition
+
+CREATE TABLE `prx_advices` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `prescription_id` int unsigned NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `prx_advices_prescription_id_foreign` (`prescription_id`),
+  CONSTRAINT `prx_advices_prescription_id_foreign` FOREIGN KEY (`prescription_id`) REFERENCES `prescriptions` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.prx_medicines_doses definition
+
+CREATE TABLE `prx_medicines_doses` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `prescription_id` int unsigned NOT NULL,
+  `medicine_name` varchar(255) NOT NULL,
+  `frequency` varchar(255) NOT NULL,
+  `composition` varchar(255) DEFAULT NULL,
+  `directions` varchar(255) NOT NULL,
+  `duration` varchar(255) NOT NULL,
+  `dose` varchar(255) NOT NULL,
+  `dose_unit` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `prx_medicines_doses_prescription_id_foreign` (`prescription_id`),
+  CONSTRAINT `prx_medicines_doses_prescription_id_foreign` FOREIGN KEY (`prescription_id`) REFERENCES `prescriptions` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.prx_tests definition
+
+CREATE TABLE `prx_tests` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `prescription_id` int unsigned NOT NULL,
+  `test_name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `prx_tests_prescription_id_foreign` (`prescription_id`),
+  CONSTRAINT `prx_tests_prescription_id_foreign` FOREIGN KEY (`prescription_id`) REFERENCES `prescriptions` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.records definition
+
+CREATE TABLE `records` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `added_by` int unsigned NOT NULL,
+  `patient_id` int unsigned NOT NULL,
+  `record` varchar(255) NOT NULL,
+  `updated_by` int unsigned NOT NULL,
+  `type` enum('history','diagnostic') DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `records_added_by_foreign` (`added_by`),
+  KEY `records_patient_id_foreign` (`patient_id`),
+  KEY `records_updated_by_foreign` (`updated_by`),
+  CONSTRAINT `records_added_by_foreign` FOREIGN KEY (`added_by`) REFERENCES `doctors` (`id`),
+  CONSTRAINT `records_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`),
+  CONSTRAINT `records_updated_by_foreign` FOREIGN KEY (`updated_by`) REFERENCES `doctors` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.tokens definition
+
+CREATE TABLE `tokens` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned DEFAULT NULL,
+  `token` varchar(255) NOT NULL,
+  `type` varchar(80) NOT NULL,
+  `is_revoked` tinyint(1) DEFAULT '0',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tokens_token_unique` (`token`),
+  KEY `tokens_user_id_foreign` (`user_id`),
+  KEY `tokens_token_index` (`token`),
+  CONSTRAINT `tokens_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.consultations definition
+
+CREATE TABLE `consultations` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `doctor_id` int unsigned NOT NULL,
+  `patient_id` int unsigned NOT NULL,
+  `status` enum('waiting','prescribed') NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `consultations_doctor_id_foreign` (`doctor_id`),
+  KEY `consultations_patient_id_foreign` (`patient_id`),
+  CONSTRAINT `consultations_doctor_id_foreign` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`),
+  CONSTRAINT `consultations_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+
+
+-- dosebook_admin.patient_prefs definition
+
+CREATE TABLE `patient_prefs` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `patient_id` int unsigned NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `patient_prefs_patient_id_foreign` (`patient_id`),
+  CONSTRAINT `patient_prefs_patient_id_foreign` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
