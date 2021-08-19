@@ -1,0 +1,131 @@
+﻿{
+  "ApiConfiguration": {
+    "UrlConfiguration": {
+
+      // Project Url
+      "BaseUrl": "https://testplan.toolsgroup.com/PromoPlanning220_Dev/",
+
+      // Login Api Url
+      "LoginUrl": "rest/account/login",
+
+      // Analytics Management Starts
+
+      "ReportPagesUrl": "rest/analytics/reportPages",
+      "ChartsByPageUrl": "rest/analytics/charts/page/{pageNumber}",
+
+      // Analytics Management Ends
+
+      // Configuration Management Starts
+
+      //ImportMasterdataConfigurationUrl
+      "ImportMasterdataConfigurationUrl": "rest/import/importMasterDataConfiguration",
+
+      //ImportTypeConfigurationUrl
+      "ImportAllTypeConfigurationUrl": "rest/import/importTypeConfiguration",
+      "ImportTypeConfigurationUrl": "rest/import/importTypeConfiguration",
+
+      // Configuration Management Ends
+
+      // Promotion Configuration Starts
+
+      //Promotion Types
+      "PromotionTypeUrl": "rest/promotypes",
+      "PromotionTypesSO99Url": "rest/promotypeSO99",
+      "SO99PromoAttributeListUrl": "rest/attributes/SO99Promo/{promoTypeId}",
+      "PromoTypeRuleListUrl": "rest/promotypeRules", // 
+
+      //Status
+      "StatusConfigListUrl": "rest/status/config",
+      "IsConfigInUseUrl": "rest/status/config/isUsed/{statusId}",
+      "DeleteStatusConfigUrl": "rest/status/config/{statusId}",
+
+      //Attributes Config
+      "AttributesConfigListUrl": "rest/attributes/config",
+      "IsAttributeInUseUrl": "rest/attributes/config/isUsed/{attributeId}",
+      "DeleteAttributeConfigUrl": "rest/attributes/config/{attributeId}",
+
+      // Promotion Configuration Ends
+
+      // Users And Permission Starts
+
+      "UserListUrl": "rest/config/users",
+      "UserTypeListUrl": "rest/config/users/types",
+      "PermissionAndDataGroupsUrl": "rest/config/permissions/masterData",
+      "AttributeConfigListUrl": "rest/attributes/config",
+      "ResetPasswordUrl": "rest/config/users/resetPassword",
+
+      // Users And Permission Ends
+
+      // Dashboard Management Starts
+
+      //Common
+      "CacheStatusUrl": "rest/promo/cache",
+      "AuthUrl": "rest/auth", 
+      "ConfigSettingUrl": "rest/settings", // 
+      "PermissionAndDatagroupsUrl": "rest/config/permissions/masterData",
+      "AllUsersUrl": "rest/config/users",
+      "FlagListUrl": "rest/flags",
+      "StatusHeaderListUrl": "rest/status/header",
+      "PromotionTypesListUrl": "rest/promotypes",
+      "UnitsOfMeasurementUrl": "rest/promos/unitsOfMeasurement", 
+      "CampaignFiltersUrl": "rest/analytics/filters/campaigns", 
+      "PromotionStatusFiltersUrl": "rest/analytics/filters/promotionStatus",
+      "PromoTypeFiltersUrl": "rest/analytics/filters/promotypes",
+      "ProductCategoryTreeFiltersUrl": "rest/analytics/filters/productCategory",
+      "MarketCategoryTreeFiltersUrl": "rest/analytics/filters/marketCategory", 
+      "MacrotypeFiltersUrl": "rest/analytics/filters/promoTypeSO99", 
+      "PromoAttributesTreeFiltersUrl": "rest/analytics/filters/promoAttributes",
+
+      //Promotion Calendar
+      "PromoCalendarUrl": "rest/promos/calendarview",
+
+      //Campaigns
+      "CampaignHeaderUrl": "rest/campaigns/headers",
+      "CampaignListUrl": "rest/campaigns",
+
+      //Promotion Grid
+      "PromoGridUrl": "rest/promos/grid",
+      "PromoDeleteUrl": "rest/promos/edit/{promoId}",
+
+      // Dashboard Management Ends
+
+      // Promotion Management Starts
+
+      //Common
+      "ForecastSummaryUrl": "rest/participants/forecastSummary/{promoId}",
+      "AttributesConfigUrl": "rest/attributes/config",
+
+      //Add Promotion
+      "GeneratedPromoIdUrl": "rest/promos/generatedPromoId",
+      "AddPromotionDetailUrl": "rest/promos/temp",
+
+      //Edit Attribute Participants
+      "ParticipantAttributesByPromotionUrl": "rest/participantAttribute/promoId/{promoId}",
+      "ParticipantAttributesCountByPromotionUrl": "rest/participantAttribute/promoId/count/{promoId}",
+      "ColumnDefinitionUrl": "rest/participantAttribute/columnDefinitions/promoType/{promoTypeId}",
+
+      //Edit Promotion
+      "PromotionDetailUrl": "rest/promos/{promoId}/temp",
+      "UpdatePromotionDetailUrl": "rest/promos/temp",
+      "DeletePromotionUrl": "rest/promos/edit/{promoId}",
+
+      //Edit Uplift Participants
+      "AggregatedParticipantsUrl": "rest/participants/aggregatedUplift/{promoId}",
+      "AggregatedParticipantsCountUrl": "rest/participants/aggregatedUplift/count/{promoId}",
+      "SplittedParticipantsListUrl": "rest/participants/split",
+      "SaveAggregatedParticipantUrl": "rest/participants",
+      "SaveSplittedParticipantsUrl": "rest/participants/split/{promoId}",
+
+      //Edit Campaign 
+      "AttributesDataCampaignListUrl": "rest/attributes/data/campaign"
+
+      // Promotion Management Ends
+    },
+    "LoginCredential": {
+      "StatusCode": 0,
+      "StatusMessage": "",
+      "UserID": "system",
+      "Password": "toolsgroupSO99+"
+    }
+  }
+}
